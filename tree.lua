@@ -192,7 +192,7 @@ h_left = nn.Identity()()
 h_right = nn.Identity()()
 h = nn.JoinTable()({h_left, h_right})
 h = nn.ReLU()(h)
-y = nn.Linear(h_dim, output_dim)(h)
+y = nn.Linear(h_dim * 2, output_dim)(h)
 y = nn.SoftMax()(y)
 m = nn.gModule({h_left, h_right}, {h, y})
 
@@ -228,7 +228,7 @@ end
 
 function forwardProp(node)
   if (node['isLeaf']) then 
-    local x = node['embed']:forward(node['word'])
+    local x = node['embed']:forward(torch.Tensor(1):fill(node['word']))
     return x
   else
     local h_left = forwardProp(node['left'])
@@ -238,7 +238,8 @@ function forwardProp(node)
   end
 end
 
-
+tree = trees[1]
+forwardProp(tree['root'])
 
 dummy_pass = 1
 
