@@ -245,7 +245,7 @@ function forwardProp(node)
     node['h_right'] = h_right
     local h, y = unpack(node['m']:forward({h_left, h_right}))
     node['y'] = y
-    node['loss'] = node['criterion']:forward({y, torch.Tensor(1):fill(node['label'])})
+    node['loss'] = node['criterion']:forward(y, torch.Tensor(1):fill(node['label']))
     loss = loss + node['loss']
     node['h'] = h
     return h
@@ -255,7 +255,7 @@ end
 function backProp(node, dh)
   
   if not node['isLeaf'] then
-    dy = node['criterion']:backward({y, torch.Tensor(1):fill(node['label'])})
+    dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
     h_left = node['h_left']
     h_right= node['h_right']
     y = node['y']
