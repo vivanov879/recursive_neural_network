@@ -182,21 +182,19 @@ trees_test = gen_trees('test1.txt')
 trees_dev = gen_trees('dev1.txt')
 
 
-
-wvDim = 30
 h_dim = 10
 output_dim = 5
 
 
 h_left = nn.Identity()()
 h_right = nn.Identity()()
-h = nn.JoinTable()({h_left, h_right})
+h = nn.JoinTable(2)({h_left, h_right})
 h = nn.ReLU()(h)
 y = nn.Linear(h_dim * 2, output_dim)(h)
 y = nn.SoftMax()(y)
 m = nn.gModule({h_left, h_right}, {h, y})
 
-embed = Embedding(#inv_wordMap, wvDim)
+embed = Embedding(#inv_wordMap, h_dim)
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed)
 params:uniform(-0.08, 0.08)
