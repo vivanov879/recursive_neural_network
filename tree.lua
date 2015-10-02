@@ -9,20 +9,21 @@ require 'table_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('')
+treeStrings = read_words('train1.txt')
 
-
-function strip(str)
-  return string.format( "Leading and trailing whitespace removed: %s", str:match( "^%s*(.-)%s*$" ) )
 
 openChar = '('
 closeChar = ')'
 
 function create_tree(treeString)
   tokens = {}
-  for toks in pairs()
-  
+  for _, toks in pairs(treeString) do
+    
+    dummy_pass = 1
+  end
   
   
   
 end
+
+create_tree(treeStrings[1])

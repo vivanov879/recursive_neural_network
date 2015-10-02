@@ -1,3 +1,13 @@
+require 'mobdebug'.start()
+require 'nn'
+require 'nngraph'
+require 'optim'
+require 'Embedding'
+local model_utils=require 'model_utils'
+require 'table_utils'
+nngraph.setDebug(true)
+
+
 
 function strip(str)
   return str:match( "^%s*(.-)%s*$" )
@@ -12,7 +22,7 @@ function read_words(fn)
 
   while line do
     sentence = {}
-    for _, word in pairs(string.split(line, "train1.txt")) do
+    for _, word in pairs(string.split(line, " ")) do
         sentence[#sentence + 1] = word
     end
     sentences[#sentences + 1] = sentence
@@ -20,5 +30,3 @@ function read_words(fn)
   end
   return sentences
 end
-
-
