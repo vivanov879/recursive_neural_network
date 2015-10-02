@@ -29,7 +29,9 @@ function create_tree(treeString)
     
     dummy_pass = 1
   end
-  return parse_tokens(tokens, nil)
+  local tree = {}
+  tree['root'] = parse_tokens(tokens, nil)
+  return tree
 end
 
 function create_node(label, word)
@@ -90,7 +92,53 @@ function parse_tokens(tokens, parent)
   
 end
 
-local trees = create_tree(treeStrings[1])
+function leftTraverse(root, nodeFn, args)
+  nodeFn(root, args)
+  if root['left'] ~= nil then
+    leftTraverse(root['left'], nodeFn, args)
+  end
+  if root['right'] ~= nil then
+    leftTraverse(root['right'], nodeFn, args)
+  end
+end
+  
+local trees = {}
+for i, treeString in pairs(treeStrings) do 
+  local tree = create_tree(treeStrings[i])
+  trees[#trees + 1] = tree
+end
+
+function countWords(node, words)
+  if node['isLeaf'] then
+    words[node['word']] = words[node['word']] or 0
+    words[node['word']] = words[node['word']] + 1
+  end
+end
+
+inv_wordMap = {}
+wordMap = {}
+words = {}
+
+function buildWordMap()
+  
+  for _, tree in pairs(trees) do 
+    leftTraverse(tree['root'], countWords, words)
+  end
+  
+  for word, _ in pairs(words) do 
+    inv_wordMap[#inv_wordMap + 1] = word
+  end
+  inv_wordMap[#inv_wordMap + 1] = 'UNK'
+  
+  for i, word in pairs(inv_wordMap) do 
+    wordMap[word] = i
+  end
+  
+end
+
+buildWordMap()
+
+
 
 
 
