@@ -170,7 +170,7 @@ trees_train = gen_trees('train1.txt')
 trees_test = gen_trees('test1.txt')
 trees_dev = gen_trees('dev1.txt')
 
-torch.save('trees.t7', {trees_train, trees_dev, trees_test, wordMap, inv_wordMap})
+torch.save('trees.t7', {trees_train, trees_dev, trees_test})
 
 
 
