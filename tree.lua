@@ -160,10 +160,7 @@ for _, tree in pairs(trees) do
   num_nodes = 0
   leftTraverse(tree['root'], count_nodes, nil)
   max_num_nodes = math.max(max_num_nodes, num_nodes)
-  print(num_nodes)
 end
-print(max_num_nodes)
-
 
 --now save test, dev, and train trees using wordMap created with train tree
 
@@ -199,19 +196,47 @@ y = nn.Linear(h_dim, output_dim)(h)
 y = nn.SoftMax()(y)
 m = nn.gModule({h_left, h_right}, {h, y})
 
+embed = Embedding(#inv_wordMap, wvDim)
+
+local params, grad_params = model_utils.combine_all_parameters(m, embed)
+params:uniform(-0.08, 0.08)
+
 m_clones = model_utils.clone_many_times(m, 20)
-embed_clones = 1
+embed_clones = model_utils.clone_many_times(embed, 20)
 
-
-function forwardProp(node)
-  if (node['isLeaf'] == true) then
-    x = 1
-    
+m_counter = 1
+embed_counter = 1
+function fill_clones(node, args)
+  if (node['isLeaf']) then
+    node['embed'] = embed_clones[embed_counter]
+    embed_counter = embed_counter + 1
+  else
+    node['m'] = m_clones[m_counter]
+    m_counter = m_counter + 1
   end
   
+  node['m'] = m_clones[m_counter]
   
 end
 
+for _, tree in pairs(trees) do 
+  m_counter = 1
+  embed_counter = 1
+  leftTraverse(tree['root'], fill_clones, nil)
+end
+
+
+function forwardProp(node)
+  if (node['isLeaf']) then 
+    local x = node['embed']:forward(node['word'])
+    return x
+  else
+    local h_left = forwardProp(node['left'])
+    local h_right = forwardProp(node['right'])
+    local h, y = unpack(node['m']:forward({h_left, h_right}))
+    node['y'] = y
+  end
+end
 
 
 
