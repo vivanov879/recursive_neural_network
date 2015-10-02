@@ -194,7 +194,7 @@ h = nn.ReLU()(h)
 m = nn.gModule({h_left, h_right}, {h})
 
 h_raw = nn.Identity()()
-y = nn.Linear(h_dim, output_dim)(h)
+y = nn.Linear(h_dim, output_dim)(h_raw)
 y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
@@ -204,10 +204,10 @@ criterion = nn.ClassNLLCriterion()
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 50)
-embed_clones = model_utils.clone_many_times(embed, 50)
-criterion_clones = model_utils.clone_many_times(criterion, 50)
-lsf_clones= model_utils.clone_many_times(lsf, 50)
+m_clones = model_utils.clone_many_times(m, 100)
+embed_clones = model_utils.clone_many_times(embed, 100)
+criterion_clones = model_utils.clone_many_times(criterion, 100)
+lsf_clones= model_utils.clone_many_times(lsf, 100)
 
 m_counter = 1
 embed_counter = 1
@@ -283,6 +283,7 @@ end
   
 tree = trees[1]
 forwardProp(tree['root'])
+backProp(tree['root'], torch.zeros(1, h_dim))
 
 dummy_pass = 1
 
