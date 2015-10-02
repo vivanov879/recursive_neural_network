@@ -2,3 +2,4 @@
 *.dot
 .idea*
 .ipynb*
+models/
