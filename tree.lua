@@ -69,7 +69,7 @@ function parse_tokens(tokens, parent)
   node['parent'] = parent
   
   if countOpen == 0 then
-    node['word'] = table.concat(tokens, ''):lower():sub(3,#tokens)
+    node['word'] = table.concat(tokens, ''):lower():sub(3, #tokens - 1)
     node['isLeaf'] = true
     return node
   end
@@ -78,7 +78,7 @@ function parse_tokens(tokens, parent)
   local tokens_left = {} 
   local tokens_right = {} 
   for i, token in pairs(tokens) do 
-    if i >= split then
+    if i >= split and i < #tokens then
       tokens_right[#tokens_right + 1] = token
     end
     if i > 2 and i < split then
