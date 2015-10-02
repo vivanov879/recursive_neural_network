@@ -11,7 +11,7 @@ require 'table_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train1.txt')
+treeStrings = read_words('train.txt')
 
 
 openChar = '('
@@ -149,6 +149,29 @@ for _, tree in pairs(trees) do
 end
 
 
-
-
 dummy_pass = 1
+
+
+--now save test, dev, and train trees using wordMap created with train tree
+
+function gen_trees(fn)
+  local treeStrings = read_words(fn)
+  local trees = {}
+  for i, treeString in pairs(treeStrings) do 
+    local tree = create_tree(treeStrings[i])
+    trees[#trees + 1] = tree
+  end
+  for _, tree in pairs(trees) do 
+    leftTraverse(tree['root'], mapWords, words)
+  end
+  return trees
+end
+
+trees_train = gen_trees('train.txt')
+trees_test = gen_trees('test.txt')
+trees_dev = gen_trees('dev.txt')
+
+torch.save('trees.t7', {trees_train, trees_dev, trees_test})
+
+
+
