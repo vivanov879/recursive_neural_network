@@ -30,3 +30,11 @@ function read_words(fn)
   end
   return sentences
 end
+
+function string2table(str)
+  local t = {}
+  for i = 1, #str do
+      t[i] = str:sub(i, i)
+  end
+  return t
+end
