@@ -36,7 +36,7 @@ end
 
 function create_node(label, word)
   local node = {}
-  node['label'] = label
+  node['label'] = label + 1
   node['word'] = word
   node['isLeaf'] = false
   return node
@@ -138,7 +138,15 @@ end
 
 buildWordMap()
 
+function mapWords(node, wordMap)
+  node['word'] = wordMap[node['word']] or wordMap['UNK']
+end
 
+dummy_pass = 1
+
+for _, tree in pairs(trees) do 
+  leftTraverse(tree['root'], mapWords, words)
+end
 
 
 
