@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train.txt')
+treeStrings = read_words('train1.txt')
 
 
 openChar = '('
@@ -150,6 +150,20 @@ end
 
 dummy_pass = 1
 
+num_nodes = 0
+function count_nodes(node, args)
+  num_nodes = num_nodes + 1
+end
+
+max_num_nodes = 0
+for _, tree in pairs(trees) do 
+  num_nodes = 0
+  leftTraverse(tree['root'], count_nodes, nil)
+  max_num_nodes = math.max(max_num_nodes, num_nodes)
+  print(num_nodes)
+end
+print(max_num_nodes)
+
 
 --now save test, dev, and train trees using wordMap created with train tree
 
@@ -170,7 +184,40 @@ trees_train = gen_trees('train1.txt')
 trees_test = gen_trees('test1.txt')
 trees_dev = gen_trees('dev1.txt')
 
-torch.save('trees.t7', {trees_train, trees_dev, trees_test})
+
+
+wvDim = 30
+h_dim = 10
+output_dim = 5
+
+
+h_left = nn.Identity()()
+h_right = nn.Identity()()
+h = nn.JoinTable()({h_left, h_right})
+h = nn.ReLU()(h)
+y = nn.Linear(h_dim, output_dim)(h)
+y = nn.SoftMax()(y)
+m = nn.gModule({h_left, h_right}, {h, y})
+
+m_clones = model_utils.clone_many_times(m, 20)
+embed_clones = 1
+
+
+function forwardProp(node)
+  if (node['isLeaf'] == true) then
+    x = 1
+    
+  end
+  
+  
+end
+
+
+
+
+dummy_pass = 1
+
+
 
 
 
