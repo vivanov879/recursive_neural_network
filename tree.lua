@@ -49,7 +49,7 @@ function parse_tokens(tokens, parent)
   countOpen = 0
   countClose = 0
   
-  if (tokens[split] == openChar) then
+  if tokens[split] == openChar then
     countOpen = countOpen + 1
     split = split + 1
   end
@@ -192,21 +192,26 @@ h = nn.JoinTable(2)({h_left, h_right})
 h = nn.Linear(2 * h_dim, h_dim)(h)
 h = nn.ReLU()(h)
 y = nn.Linear(h_dim, output_dim)(h)
-y = nn.SoftMax()(y)
+y = nn.LogSoftMax()(y)
 m = nn.gModule({h_left, h_right}, {h, y})
 
 embed = Embedding(#inv_wordMap, h_dim)
+criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed)
 params:uniform(-0.08, 0.08)
 
 m_clones = model_utils.clone_many_times(m, 50)
 embed_clones = model_utils.clone_many_times(embed, 50)
+criterion_clones = model_utils.clone_many_times(criterion, 50)
 
 m_counter = 1
 embed_counter = 1
+criterion_counter = 1
 function fill_clones(node, args)
-  if (node['isLeaf']) then
+  node['criterion'] = criterion_clones[criterion_counter]
+  criterion_counter = criterion_counter + 1
+  if node['isLeaf'] then
     node['embed'] = embed_clones[embed_counter]
     embed_counter = embed_counter + 1
   else
@@ -225,20 +230,49 @@ for _, tree in pairs(trees) do
 end
 
 
+loss = 0
 function forwardProp(node)
-  if (node['isLeaf']) then 
-    local x = node['embed']:forward(torch.Tensor(1):fill(node['word']))
-    return x
+  if node['isLeaf'] then 
+    local x = torch.Tensor(1):fill(node['word'])
+    local h = node['embed']:forward(x)
+    node['h'] = h
+    node['x'] = x
+    return h
   else
     local h_left = forwardProp(node['left'])
     local h_right = forwardProp(node['right'])
+    node['h_left'] = h_left
+    node['h_right'] = h_right
     local h, y = unpack(node['m']:forward({h_left, h_right}))
     node['y'] = y
+    node['loss'] = node['criterion']:forward({y, torch.Tensor(1):fill(node['label'])})
+    loss = loss + node['loss']
     node['h'] = h
     return h
   end
 end
 
+function backProp(node, dh)
+  
+  if not node['isLeaf'] then
+    dy = node['criterion']:backward({y, torch.Tensor(1):fill(node['label'])})
+    h_left = node['h_left']
+    h_right= node['h_right']
+    y = node['y']
+    h = node['h']
+    dh_left, dh_right = unpack(node['m']:backward({h_left, h_right}, {dh, dy}))
+    backProp(node['left'], dh_left)
+    backProp(node['right'], dh_right)
+    
+  else 
+    h = node['h']
+    x = node['x']
+    dx = node['embed']:backward(x, dh)
+  end
+
+end
+  
+  
 tree = trees[1]
 forwardProp(tree['root'])
 
