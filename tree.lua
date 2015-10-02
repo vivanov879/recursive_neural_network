@@ -36,6 +36,7 @@ function create_node(label, word)
   local node = {}
   node['label'] = label
   node['word'] = word
+  node['isLeaf'] = false
   return node
   
 end
@@ -89,6 +90,9 @@ function parse_tokens(tokens, parent)
   
 end
 
+local trees = create_tree(treeStrings[1])
 
 
-create_tree(treeStrings[1])
+
+
+dummy_pass = 1
