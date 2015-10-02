@@ -189,8 +189,9 @@ output_dim = 5
 h_left = nn.Identity()()
 h_right = nn.Identity()()
 h = nn.JoinTable(2)({h_left, h_right})
+h = nn.Linear(2 * h_dim, h_dim)(h)
 h = nn.ReLU()(h)
-y = nn.Linear(h_dim * 2, output_dim)(h)
+y = nn.Linear(h_dim, output_dim)(h)
 y = nn.SoftMax()(y)
 m = nn.gModule({h_left, h_right}, {h, y})
 
@@ -199,8 +200,8 @@ embed = Embedding(#inv_wordMap, h_dim)
 local params, grad_params = model_utils.combine_all_parameters(m, embed)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 20)
-embed_clones = model_utils.clone_many_times(embed, 20)
+m_clones = model_utils.clone_many_times(m, 50)
+embed_clones = model_utils.clone_many_times(embed, 50)
 
 m_counter = 1
 embed_counter = 1
@@ -233,6 +234,8 @@ function forwardProp(node)
     local h_right = forwardProp(node['right'])
     local h, y = unpack(node['m']:forward({h_left, h_right}))
     node['y'] = y
+    node['h'] = h
+    return h
   end
 end
 
