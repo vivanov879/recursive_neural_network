@@ -29,10 +29,10 @@ function create_tree(treeString)
     
     dummy_pass = 1
   end
-  return parse_tokens(tokens)
+  return parse_tokens(tokens, nil)
 end
 
-function create_node(label, word = '')
+function create_node(label, word)
   local node = {}
   node['label'] = label
   node['word'] = word
@@ -40,7 +40,7 @@ function create_node(label, word = '')
   
 end
 
-function parse_tokens(tokens, parent = nil)
+function parse_tokens(tokens, parent)
   assert(tokens[1] == openChar)
   assert(tokens[#tokens] == closeChar)
   local split = 3
@@ -49,7 +49,7 @@ function parse_tokens(tokens, parent = nil)
   
   if (tokens[split] == openChar) then
     countOpen = countOpen + 1
-    split = 1
+    split = split + 1
   end
   
   while countOpen ~= countClose do 
@@ -62,15 +62,30 @@ function parse_tokens(tokens, parent = nil)
     split = split + 1
   end
   
-  local node = create_node(tonumber(tokens[2]))
+  local node = create_node(tonumber(tokens[2]), nil)
   node['parent'] = parent
   
   if countOpen == 0 then
-    node['word'] = 
-      
-    
+    node['word'] = table.concat(tokens, ''):lower():sub(3,#tokens)
+    node['isLeaf'] = true
+    return node
   end
   
+  
+  local tokens_left = {} 
+  local tokens_right = {} 
+  for i, token in pairs(tokens) do 
+    if i >= split then
+      tokens_right[#tokens_right + 1] = token
+    end
+    if i > 2 and i < split then
+      tokens_left[#tokens_left + 1] = token
+    end
+  end
+  
+  node['left'] = parse_tokens(tokens_left, node)
+  node['right'] = parse_tokens(tokens_right, node)
+  return node
   
 end
 
