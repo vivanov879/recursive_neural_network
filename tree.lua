@@ -337,7 +337,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 100 do
+for i = 1, 1000 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 1 == 0 then
