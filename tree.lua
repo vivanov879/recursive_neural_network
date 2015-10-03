@@ -312,13 +312,13 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-2}
+optim_state = {learningRate = 1e-4}
 
 
 for i = 1, 1000000 do
 
   local _, loss = optim.adam(feval, params, optim_state)
-  if i % 1 == 0 then
+  if i % 100 == 0 then
     print(string.format( 'loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss[1], grad_params:norm(), params:norm()))
   end
   
