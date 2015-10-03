@@ -308,7 +308,7 @@ function gen_batch()
     data_index = data_index + batch_size
   end
   local batch = {}
-  local basic_batch_size = end_index - start_index + 1
+  basic_batch_size = end_index - start_index + 1
   for k = 1, basic_batch_size do 
     local tree = trees[start_index + k - 1]
     batch[#batch + 1] = tree
