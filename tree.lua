@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train.txt')
+treeStrings = read_words('train1.txt')
 
 
 openChar = '('
@@ -177,9 +177,9 @@ function gen_trees(fn)
   return trees
 end
 
-trees_train = gen_trees('train.txt')
-trees_test = gen_trees('test.txt')
-trees_dev = gen_trees('dev.txt')
+trees_train = gen_trees('train1.txt')
+trees_test = gen_trees('test1.txt')
+trees_dev = gen_trees('dev1.txt')
 
 
 h_dim = 30
@@ -287,7 +287,8 @@ end
 
 
 function populate_confusion_matrix(node, confusion)
-  confusion[node['label']][node['y']] = confusion[node['label']][node['y']] + 1
+  local _, predicted_class  = node['y']:max(2)
+  confusion[node['label']][predicted_class[1][1]] = confusion[node['label']][predicted_class[1][1]] + 1
 end
 
   
@@ -327,10 +328,10 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 100 do
+for i = 1, 10 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
-  if i % 100 == 0 then
+  if i % 10 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
     
     tree = trees_dev[1]
@@ -351,16 +352,13 @@ end
 
 confusion_train = torch.zeros(5, 5)
 for k, tree in pairs(trees) do 
-  print(k)
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_train)
 end
-confusion_train = confusion:clone()
 
 confusion_dev = torch.zeros(5, 5)
 for _, tree in pairs(trees_dev) do 
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_dev)
 end
-
 
 
 print(confusion_train)
