@@ -263,13 +263,14 @@ function forwardProp(node)
   return h
 end
 
-function backProp(node, dh)
-  local y, h, dy, dh, h_left, h_right, dx, x
+function backProp(node, dh1)
+  local y, h, dy, dh, hd2, h_left, h_right, dx, x
   y = node['y']
   h = node['h']
     
   dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
-  dh = node['lsf']:backward(h, dy)
+  dh2 = node['lsf']:backward(h, dy)
+  dh = dh1 + dh2
   
   if not node['isLeaf'] then
     h_left = node['h_left']
@@ -337,7 +338,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 1000 do
+for i = 1, 100 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 1 == 0 then
