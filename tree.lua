@@ -240,6 +240,7 @@ fill(trees_dev)
 
 loss = 0
 function forwardProp(node)
+  local x, h, h_left, h_right, y
   if node['isLeaf'] then 
     x = torch.Tensor(1):fill(node['word'])
     h = node['embed']:forward(x)
@@ -263,8 +264,10 @@ function forwardProp(node)
 end
 
 function backProp(node, dh)
+  local y, h, dy, dh, h_left, h_right, dx, x
   y = node['y']
   h = node['h']
+  x = node['x']
     
   dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
   dh = node['lsf']:backward(h, dy)
@@ -334,7 +337,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 1000 do
+for i = 1, 100 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 1 == 0 then
