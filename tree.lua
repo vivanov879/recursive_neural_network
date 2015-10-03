@@ -283,13 +283,14 @@ function backProp(node, dh)
   else
     dx = node['embed']:backward(x, dh)
   end
-
 end
   
   
 tree = trees[1]
 forwardProp(tree['root'])
 backProp(tree['root'], torch.zeros(1, h_dim))
+
+
 
 data_index = 1
 n_data = #trees
@@ -336,9 +337,6 @@ for i = 1, 100000 do
   end
   
 end
-print('training done')
-
-
 
 dummy_pass = 1
 
