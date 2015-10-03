@@ -238,7 +238,7 @@ fill(trees)
 fill(trees_dev)
 
 
-loss = 0
+loss = 0 --used for forwardProp
 function forwardProp(node)
   local x, h, h_left, h_right, y
   if node['isLeaf'] then 
@@ -296,7 +296,7 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-batch_size = 100
+batch_size = 1000
 data_index = 1
 n_data = #trees
 function gen_batch()
