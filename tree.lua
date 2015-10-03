@@ -284,11 +284,16 @@ function backProp(node, dh)
     dx = node['embed']:backward(x, dh)
   end
 end
+
+
+function populate_confusion_matrix(node, confusion)
+  confusion[node['label']][node['y']] = confusion[node['label']][node['y']] + 1
+end
+
   
-  
-tree = trees[1]
-forwardProp(tree['root'])
-backProp(tree['root'], torch.zeros(1, h_dim))
+--tree = trees[1]
+--forwardProp(tree['root'])
+--backProp(tree['root'], torch.zeros(1, h_dim))
 
 
 
@@ -322,7 +327,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 100000 do
+for i = 1, 100 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 100 == 0 then
@@ -338,6 +343,30 @@ for i = 1, 100000 do
   end
   
 end
+
+for _, tree in pairs(trees_dev) do 
+    loss = 0
+    forwardProp(tree['root'])
+end
+
+confusion_train = torch.zeros(5, 5)
+for k, tree in pairs(trees) do 
+  print(k)
+  leftTraverse(tree['root'], populate_confusion_matrix, confusion_train)
+end
+confusion_train = confusion:clone()
+
+confusion_dev = torch.zeros(5, 5)
+for _, tree in pairs(trees_dev) do 
+  leftTraverse(tree['root'], populate_confusion_matrix, confusion_dev)
+end
+
+
+
+print(confusion_train)
+print(confusion_dev)
+
+
 
 dummy_pass = 1
 
