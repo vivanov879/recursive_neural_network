@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train1.txt')
+treeStrings = read_words('train.txt')
 
 
 openChar = '('
@@ -177,9 +177,9 @@ function gen_trees(fn)
   return trees
 end
 
-trees_train = gen_trees('train1.txt')
-trees_test = gen_trees('test1.txt')
-trees_dev = gen_trees('dev1.txt')
+trees_train = gen_trees('train.txt')
+trees_test = gen_trees('test.txt')
+trees_dev = gen_trees('dev.txt')
 
 
 h_dim = 10
@@ -206,8 +206,8 @@ params:uniform(-0.08, 0.08)
 
 m_clones = model_utils.clone_many_times(m, 100)
 embed_clones = model_utils.clone_many_times(embed, 100)
-criterion_clones = model_utils.clone_many_times(criterion, 100)
-lsf_clones= model_utils.clone_many_times(lsf, 100)
+criterion_clones = model_utils.clone_many_times(criterion, 150)
+lsf_clones= model_utils.clone_many_times(lsf, 150)
 
 m_counter = 1
 embed_counter = 1
