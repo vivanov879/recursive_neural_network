@@ -180,7 +180,7 @@ end
 trees_dev = gen_trees('dev.txt')
 
 
-h_dim = 10
+h_dim = 30
 output_dim = 5
 
 
@@ -293,7 +293,7 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-batch_size = 30
+batch_size = 100
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -331,24 +331,24 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-1}
+optim_state = {learningRate = 1e-2}
 
 
 for i = 1, 1000 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
-  if i % 10 == 0 then
+  if i % 1 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
   end
   
-  if i % 100 == 0 then
+  if i % 10 == 0 then
     loss = 0
     for _, tree in pairs(trees_dev) do 
       forwardProp(tree['root'])
     end
     loss = loss / #trees_dev
     print(string.format( 'loss_dev = %6.8f', loss))
-    torch.save('model.t7', m)
+    --torch.save('model.t7', m)
   end
   
 end
