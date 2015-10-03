@@ -182,7 +182,7 @@ trees_test = gen_trees('test.txt')
 trees_dev = gen_trees('dev.txt')
 
 
-h_dim = 10
+h_dim = 30
 output_dim = 5
 
 
@@ -318,16 +318,16 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-4}
+optim_state = {learningRate = 1e-2}
 
 
 for i = 1, 100000 do
 
-  local _, loss_train = optim.adam(feval, params, optim_state)
+  local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 100 == 0 then
-    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
+    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration = %d', loss_train[1], grad_params:norm(), params:norm()), i)
 
-    tree = trees_dev[math.random(#trees_dev)]
+    tree = trees_dev[1]
     forwardProp(tree['root'])
     print(string.format( 'loss_dev = %6.8f', loss))
 
@@ -335,8 +335,6 @@ for i = 1, 100000 do
   end
   
 end
-print('training done')
-
 
 
 dummy_pass = 1
