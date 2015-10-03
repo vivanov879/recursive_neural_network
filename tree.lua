@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train1.txt')
+treeStrings = read_words('train.txt')
 
 
 openChar = '('
@@ -177,9 +177,9 @@ function gen_trees(fn)
   return trees
 end
 
-trees_train = gen_trees('train1.txt')
-trees_test = gen_trees('test1.txt')
-trees_dev = gen_trees('dev1.txt')
+trees_train = gen_trees('train.txt')
+trees_test = gen_trees('test.txt')
+trees_dev = gen_trees('dev.txt')
 
 
 h_dim = 30
@@ -328,10 +328,10 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 10 do
+for i = 1, 100000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
-  if i % 10 == 0 then
+  if i % 1000 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
     
     tree = trees_dev[1]
