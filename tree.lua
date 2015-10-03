@@ -46,8 +46,8 @@ function parse_tokens(tokens, parent)
   assert(tokens[1] == openChar)
   assert(tokens[#tokens] == closeChar)
   local split = 3
-  countOpen = 0
-  countClose = 0
+  local countOpen = 0
+  local countClose = 0
   
   if tokens[split] == openChar then
     countOpen = countOpen + 1
@@ -157,7 +157,7 @@ end
 
 max_num_nodes = 0
 for _, tree in pairs(trees) do 
-  num_nodes = 0
+  local num_nodes = 0
   leftTraverse(tree['root'], count_nodes, nil)
   max_num_nodes = math.max(max_num_nodes, num_nodes)
 end
@@ -267,7 +267,6 @@ function backProp(node, dh)
   local y, h, dy, dh, h_left, h_right, dx, x
   y = node['y']
   h = node['h']
-  x = node['x']
     
   dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
   dh = node['lsf']:backward(h, dy)
@@ -280,6 +279,7 @@ function backProp(node, dh)
     backProp(node['right'], dh_right)
     
   else
+    x = node['x']
     dx = node['embed']:backward(x, dh)
   end
 end
@@ -300,15 +300,15 @@ batch_size = 100
 data_index = 1
 n_data = #trees
 function gen_batch()
-  start_index = data_index
-  end_index = math.min(n_data, start_index + batch_size - 1)
+  local start_index = data_index
+  local end_index = math.min(n_data, start_index + batch_size - 1)
   if end_index == n_data then
     data_index = 1
   else
     data_index = data_index + batch_size
   end
-  batch = {}
-  basic_batch_size = end_index - start_index + 1
+  local batch = {}
+  local basic_batch_size = end_index - start_index + 1
   for k = 1, basic_batch_size do 
     local tree = trees[start_index + k - 1]
     batch[#batch + 1] = tree
@@ -323,7 +323,7 @@ function feval(x_arg)
     grad_params:zero()
     
     loss = 0
-    batch = gen_batch()
+    local batch = gen_batch()
     for _, tree in pairs(batch) do 
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
