@@ -180,7 +180,7 @@ end
 trees_dev = gen_trees('dev.txt')
 
 
-h_dim = 30
+h_dim = 100
 output_dim = 5
 
 
@@ -197,6 +197,12 @@ y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
 embed = Embedding(#inv_wordMap, h_dim)
+weights = torch.ones(5)
+weights[1] = 0.1
+weights[2] = 0.3
+weights[3] = 1
+weights[4] = weights[2]
+weights[5] = weights[1]
 criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
@@ -237,8 +243,8 @@ end
 fill(trees)
 fill(trees_dev)
 
-
 loss = 0 --used for forwardProp
+loss_counter = 0
 function forwardProp(node)
   local x, h, h_left, h_right, y
   if node['isLeaf'] then 
@@ -257,6 +263,7 @@ function forwardProp(node)
   y = node['lsf']:forward(h)
   node['loss'] = node['criterion']:forward(y, torch.Tensor(1):fill(node['label']))
   loss = loss + node['loss']
+  loss_counter = loss_counter + 1
   node['y'] = y
   node['h'] = h
   
@@ -297,7 +304,7 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-batch_size = 1000
+batch_size = 100
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -324,12 +331,13 @@ function feval(x_arg)
     grad_params:zero()
     
     loss = 0
+    loss_counter = 0
     local batch = gen_batch()
     for _, tree in pairs(batch) do 
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
     end
-    loss = loss / basic_batch_size
+    loss = (loss / loss_counter) / basic_batch_size
     
     return loss, grad_params
 end
@@ -347,10 +355,11 @@ for i = 1, 100 do
   
   if i % 10 == 0 then
     loss = 0
+    loss_counter = 0
     for _, tree in pairs(trees_dev) do 
       forwardProp(tree['root'])
     end
-    loss = loss / #trees_dev
+    loss = (loss / loss_counter) / #trees_dev
     print(string.format( 'loss_dev = %6.8f', loss))
     --torch.save('model.t7', m)
   end
