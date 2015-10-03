@@ -285,6 +285,52 @@ tree = trees[1]
 forwardProp(tree['root'])
 backProp(tree['root'], torch.zeros(1, h_dim))
 
+data_index = 1
+n_data = #trees
+function gen_batch()
+  if data_index > n_data then
+    data_index = 1
+  end
+  local tree = trees[data_index]
+  data_index = data_index + 1
+  return tree
+end
+
+function feval(x_arg)
+    if x_arg ~= params then
+        params:copy(x_arg)
+    end
+    grad_params:zero()
+    
+    loss = 0
+    local tree = gen_batch()
+    
+    forwardProp(tree['root'])
+    backProp(tree['root'], torch.zeros(1, h_dim))
+    
+    return loss, grad_params
+end
+        
+    
+optim_state = {learningRate = 1e-2}
+
+
+for i = 1, 1000000 do
+
+  local _, loss = optim.adam(feval, params, optim_state)
+  if i % 1 == 0 then
+    print(string.format( 'loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss[1], grad_params:norm(), params:norm()))
+  end
+  
+  if i % 10 == 0 then
+    torch.save('model.t7', m)
+  end
+  
+end
+
+
+
+
 dummy_pass = 1
 
 
