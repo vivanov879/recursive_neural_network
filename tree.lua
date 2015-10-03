@@ -328,10 +328,10 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 100000 do
+for i = 1, 10000 do
 
-  local _, loss_train = optim.adagrad(feval, params, optim_state)
-  if i % 1000 == 0 then
+  local _, loss_train = optim.adam(feval, params, optim_state)
+  if i % 100 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
     
     tree = trees_dev[1]
