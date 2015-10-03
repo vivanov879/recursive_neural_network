@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train.txt')
+treeStrings = read_words('train1.txt')
 
 
 openChar = '('
@@ -177,9 +177,9 @@ function gen_trees(fn)
   return trees
 end
 
-trees_train = gen_trees('train.txt')
-trees_test = gen_trees('test.txt')
-trees_dev = gen_trees('dev.txt')
+trees_train = gen_trees('train1.txt')
+trees_test = gen_trees('test1.txt')
+trees_dev = gen_trees('dev1.txt')
 
 
 h_dim = 30
@@ -297,16 +297,24 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-
+batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
-  if data_index > n_data then
+  start_index = data_index
+  end_index = math.min(n_data, start_index + batch_size - 1)
+  if end_index == n_data then
     data_index = 1
+  else
+    data_index = data_index + batch_size
   end
-  local tree = trees[data_index]
-  data_index = data_index + 1
-  return tree
+  batch = {}
+  basic_batch_size = end_index - start_index + 1
+  for k = 1, basic_batch_size do 
+    local tree = trees[start_index + k - 1]
+    batch[#batch + 1] = tree
+  end
+  return batch
 end
 
 function feval(x_arg)
@@ -316,10 +324,12 @@ function feval(x_arg)
     grad_params:zero()
     
     loss = 0
-    local tree = gen_batch()
-    
-    forwardProp(tree['root'])
-    backProp(tree['root'], torch.zeros(1, h_dim))
+    batch = gen_batch()
+    for _, tree in pairs(batch) do 
+      forwardProp(tree['root'])
+      backProp(tree['root'], torch.zeros(1, h_dim))
+    end
+    loss = loss / basic_batch_size
     
     return loss, grad_params
 end
@@ -328,10 +338,10 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 10000 do
+for i = 1, 100 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
-  if i % 100 == 0 then
+  if i % 10 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
     
     tree = trees_dev[1]
