@@ -328,7 +328,7 @@ for i = 1, 100000 do
   if i % 100 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
     
-    tree = trees_dev[math.random(1, #trees_dev)]
+    tree = trees_dev[1]
     loss = 0
     forwardProp(tree['root'])
     print(string.format( 'loss_dev = %6.8f', loss))
