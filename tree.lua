@@ -144,7 +144,7 @@ end
 dummy_pass = 1
 
 for _, tree in pairs(trees) do 
-  leftTraverse(tree['root'], mapWords, words)
+  leftTraverse(tree['root'], mapWords, wordMap)
 end
 
 
@@ -172,7 +172,7 @@ function gen_trees(fn)
     trees[#trees + 1] = tree
   end
   for _, tree in pairs(trees) do 
-    leftTraverse(tree['root'], mapWords, words)
+    leftTraverse(tree['root'], mapWords, wordMap)
   end
   return trees
 end
@@ -227,13 +227,19 @@ function fill_clones(node, args)
   end
 end
 
-for _, tree in pairs(trees) do 
-  m_counter = 1
-  embed_counter = 1
-  criterion_counter = 1
-  lsf_counter = 1
-  leftTraverse(tree['root'], fill_clones, nil)
+function fill(trees)
+  for _, tree in pairs(trees) do 
+    m_counter = 1
+    embed_counter = 1
+    criterion_counter = 1
+    lsf_counter = 1
+    leftTraverse(tree['root'], fill_clones, nil)
+  end
 end
+fill(trees)
+fill(trees_dev)
+fill(trees_train)
+fill(trees_test)
 
 
 loss = 0
@@ -315,19 +321,21 @@ end
 optim_state = {learningRate = 1e-4}
 
 
-for i = 1, 1000000 do
+for i = 1, 100000 do
 
-  local _, loss = optim.adam(feval, params, optim_state)
+  local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 100 == 0 then
-    print(string.format( 'loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss[1], grad_params:norm(), params:norm()))
-  end
-  
-  if i % 10 == 0 then
+    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
+
+    tree = trees_dev[math.random(#trees_dev)]
+    forwardProp(tree['root'])
+    print(string.format( 'loss_dev = %6.8f', loss))
+
     torch.save('model.t7', m)
   end
   
 end
-
+print('training done')
 
 
 
