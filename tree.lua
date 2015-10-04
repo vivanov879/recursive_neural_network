@@ -180,7 +180,7 @@ end
 trees_dev = gen_trees('dev.txt')
 
 
-h_dim = 30
+h_dim = 100
 output_dim = 5
 
 
@@ -192,7 +192,9 @@ h = nn.ReLU()(h)
 m = nn.gModule({h_left, h_right}, {h})
 
 h_raw = nn.Identity()()
-y = nn.Linear(h_dim, output_dim)(h_raw)
+h = nn.Linear(h_dim, h_dim/2)(h_raw)
+h = nn.Tanh()(h)
+y = nn.Linear(h_dim/2, output_dim)(h)
 y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
@@ -336,7 +338,7 @@ function feval(x_arg)
       backProp(tree['root'], torch.zeros(1, h_dim))
     loss = (loss / loss_counter)
     return loss, grad_params
-end\
+end
         
     
 optim_state = {learningRate = 1e-2}
@@ -347,7 +349,10 @@ for i = 1, 300000 do
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 100 == 0 then
     f1_score_train, precision_train, recall_train = calc_nodes_f1()   
-    print(string.format("train set: loss = %6.8f, f1_score = %6.8f, precision = %6.8f, recall = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss_train[1], f1_score_train, precision_train, recall_train, grad_params:norm(), params:norm()))
+    print('train f1_score:', f1_score_train)
+    print('train precesion:', precision_train)
+    print('train recall:', recall_train)
+    print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss_train[1], grad_params:norm(), params:norm()))
 
   end
   
@@ -360,7 +365,10 @@ for i = 1, 300000 do
     forwardProp(tree['root'])
     loss = (loss / loss_counter)
     f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()  
-    print(string.format("dev set: loss = %6.8f, f1_score = %6.8f, precision = %6.8f, recall = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss, f1_score_dev , precision_dev, recall_dev, grad_params:norm(), params:norm()))
+    print('dev f1_score:', f1_score_dev)
+    print('dev precesion:', precision_dev)
+    print('dev recall:', recall_dev)
+    print(string.format("dev set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss, grad_params:norm(), params:norm()))
     --torch.save('model.t7', m)
   end
   
