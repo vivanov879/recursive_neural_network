@@ -180,7 +180,7 @@ end
 trees_dev = gen_trees('dev.txt')
 
 
-h_dim = 100
+h_dim = 30
 output_dim = 5
 
 
@@ -197,12 +197,6 @@ y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
 embed = Embedding(#inv_wordMap, h_dim)
-weights = torch.ones(5)
-weights[1] = 0.1
-weights[2] = 0.3
-weights[3] = 1
-weights[4] = weights[2]
-weights[5] = weights[1]
 criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
@@ -304,7 +298,7 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-batch_size = 100
+batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -346,14 +340,14 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 100 do
+for i = 1, 4000 do
 
-  local _, loss_train = optim.adam(feval, params, optim_state)
-  if i % 1 == 0 then
-    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e', loss_train[1], grad_params:norm(), params:norm()))
+  local _, loss_train = optim.adagrad(feval, params, optim_state)
+  if i % 10 == 0 then
+    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration %d ', loss_train[1], grad_params:norm(), params:norm(), i))
   end
   
-  if i % 10 == 0 then
+  if i % 50 == 0 then
     loss = 0
     loss_counter = 0
     for _, tree in pairs(trees_dev) do 
