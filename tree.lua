@@ -303,6 +303,9 @@ n_data = #trees
 function gen_batch()
   local tree = trees[data_index]
   data_index = data_index + 1
+  if data_index > n_data then
+    data_index = 1
+  end
   return tree
 end
 
@@ -337,6 +340,7 @@ for i = 1, 10000 do
     loss = 0
     loss_counter = 0
     tree = trees_dev[1]
+    forwardProp(tree['root'])
     loss = (loss / loss_counter)
     print(string.format( 'loss_dev = %6.8f', loss))
     --torch.save('model.t7', m)
