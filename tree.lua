@@ -197,6 +197,7 @@ y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
 embed = Embedding(#inv_wordMap, h_dim)
+weights = torch.Tensor({1,0.5,0.2,0.5,1})
 criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
@@ -310,7 +311,7 @@ function calc_nodes_f1()
   
 end
 
-batch_size = 30
+batch_size = 1
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -353,13 +354,13 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-2}
+optim_state = {learningRate = 1e-4}
 
 
-for i = 1, 300000 do
+for i = 1, 10000 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
-  if i % 100 == 0 then
+  if i % 10 == 0 then
     f1_score_train, precision_train, recall_train = calc_nodes_f1()   
     print('train f1_score:', f1_score_train)
     print('train precesion:', precision_train)
