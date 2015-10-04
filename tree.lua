@@ -197,7 +197,7 @@ y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
 embed = Embedding(#inv_wordMap, h_dim)
-weights = torch.Tensor({1,0.5,0.2,0.5,1})
+weights = torch.Tensor({1,0.5,0.1,0.5,1})
 criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
@@ -357,7 +357,7 @@ end
 optim_state = {learningRate = 1e-1}
 
 
-for i = 1, 10000 do
+for i = 1, 1000 do
 
   local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 10 == 0 then
@@ -369,7 +369,7 @@ for i = 1, 10000 do
 
   end
   
-  if i % 1000 == 0 then
+  if i % 200 == 0 then
     loss = 0
     loss_counter = 0
     node_ys = {}
