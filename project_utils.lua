@@ -42,9 +42,9 @@ end
 
 
 function calc_f1(prediction, target)
-  local f1_accum = 0
-  local precision_accum = 0
-  local recall_accum = 0
+  local f1_accum = {}
+  local precision_accum = {}
+  local recall_accum = {}
   for c = 1, 5 do
     local p = torch.eq(prediction, c):double()
     local t = torch.eq(target, c):double()
@@ -62,11 +62,11 @@ function calc_f1(prediction, target)
     local recall = true_positives / (true_positives + false_negatives)
     
     local f1_score = 2 * precision * recall / (precision + recall)
-    f1_accum = f1_accum + f1_score 
-    precision_accum = precision_accum + precision
-    recall_accum = recall_accum + recall
+    f1_accum[#f1_accum + 1] = f1_score 
+    precision_accum[#precision_accum + 1] = precision
+    recall_accum[#recall_accum + 1] = recall
     
     
   end
-  return {f1_accum / 5, precision_accum / 5, recall_accum / 5}
+  return {f1_accum, precision_accum, recall_accum}
 end

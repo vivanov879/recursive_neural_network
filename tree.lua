@@ -352,7 +352,7 @@ for i = 1, 300000 do
     print('train f1_score:', f1_score_train)
     print('train precesion:', precision_train)
     print('train recall:', recall_train)
-    print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss_train[1], grad_params:norm(), params:norm()))
+    print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration = %d", loss_train[1], grad_params:norm(), params:norm(), i))
 
   end
   
