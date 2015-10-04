@@ -336,7 +336,7 @@ function feval(x_arg)
       backProp(tree['root'], torch.zeros(1, h_dim))
     loss = (loss / loss_counter)
     return loss, grad_params
-end
+end\
         
     
 optim_state = {learningRate = 1e-2}
