@@ -337,6 +337,9 @@ function feval(x_arg)
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
     loss = (loss / loss_counter)
+    
+    grad_params:clamp(-5, 5)
+
     return loss, grad_params
 end
         
