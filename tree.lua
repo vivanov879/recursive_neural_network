@@ -298,24 +298,12 @@ end
 --backProp(tree['root'], torch.zeros(1, h_dim))
 
 
-batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
-  local start_index = data_index
-  local end_index = math.min(n_data, start_index + batch_size - 1)
-  if end_index == n_data then
-    data_index = 1
-  else
-    data_index = data_index + batch_size
-  end
-  local batch = {}
-  basic_batch_size = end_index - start_index + 1
-  for k = 1, basic_batch_size do 
-    local tree = trees[start_index + k - 1]
-    batch[#batch + 1] = tree
-  end
-  return batch
+  local tree = trees[data_index]
+  data_index = data_index + 1
+  return tree
 end
 
 function feval(x_arg)
@@ -326,13 +314,10 @@ function feval(x_arg)
     
     loss = 0
     loss_counter = 0
-    local batch = gen_batch()
-    for _, tree in pairs(batch) do 
+    local tree = gen_batch()
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
-    end
-    loss = (loss / loss_counter) / #batch
-    
+    loss = (loss / loss_counter)
     return loss, grad_params
 end
         
@@ -340,23 +325,19 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 8500 * 50 / 30 do
+for i = 1, 10000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
-  if i % 10 == 0 then
+  if i % 100 == 0 then
     print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration %d ', loss_train[1], grad_params:norm(), params:norm(), i))
   end
   
-  if i % 50 == 0 then
+  if i % 500 == 0 then
     local dev_size = basic_batch_size
     loss = 0
     loss_counter = 0
-    for k, tree in pairs(trees_dev) do 
-      if k <= dev_size then
-        forwardProp(tree['root'])
-      end
-    end
-    loss = (loss / loss_counter) / dev_size
+    tree = trees_dev[1]
+    loss = (loss / loss_counter)
     print(string.format( 'loss_dev = %6.8f', loss))
     --torch.save('model.t7', m)
   end
