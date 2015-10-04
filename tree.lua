@@ -109,8 +109,8 @@ end
 
 function countWords(node, words)
   if node['isLeaf'] then
-    words[node['word']] = words[node['word']] or 0
-    words[node['word']] = words[node['word']] + 1
+    words[node['word']] = (words[node['word']] or 0) + 1
+
   end
 end
 
@@ -188,7 +188,7 @@ h_left = nn.Identity()()
 h_right = nn.Identity()()
 h = nn.JoinTable(2)({h_left, h_right})
 h = nn.Linear(2 * h_dim, h_dim)(h)
-h = nn.ReLU()(h)
+h = nn.Tanh()(h)
 m = nn.gModule({h_left, h_right}, {h})
 
 h_raw = nn.Identity()()
@@ -311,7 +311,7 @@ function calc_nodes_f1()
   
 end
 
-batch_size = 1
+batch_size = 2
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -354,7 +354,7 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-4}
+optim_state = {learningRate = 1e-1}
 
 
 for i = 1, 10000 do
@@ -380,7 +380,7 @@ for i = 1, 10000 do
       backProp(tree['root'], torch.zeros(1, h_dim))
     end
     loss = loss / loss_counter
-    f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()  
+    f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()
     print('dev f1_score:', f1_score_dev)
     print('dev precesion:', precision_dev)
     print('dev recall:', recall_dev)
