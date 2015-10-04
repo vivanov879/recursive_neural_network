@@ -237,6 +237,8 @@ end
 fill(trees)
 fill(trees_dev)
 
+node_ys = {}
+node_labels = {}
 loss = 0 --used for forwardProp
 loss_counter = 0
 function forwardProp(node)
@@ -260,7 +262,8 @@ function forwardProp(node)
   loss_counter = loss_counter + 1
   node['y'] = y
   node['h'] = h
-  
+  node_ys[#node_ys + 1] = node['y']
+  node_labels[#node_labels + 1] = node['label']
   return h
 end
 
@@ -293,10 +296,19 @@ function populate_confusion_matrix(node, confusion)
 end
 
   
---tree = trees[1]
---forwardProp(tree['root'])
---backProp(tree['root'], torch.zeros(1, h_dim))
-
+function calc_nodes_f1()
+  assert(#node_ys == #node_labels)
+  node_ys_t = torch.Tensor(#node_ys, 5)
+  node_labels_t = torch.Tensor(#node_labels)
+  for i, _ in pairs(node_ys) do 
+    node_ys_t[{{i}, {}}] = node_ys[i]
+    node_labels_t[i] = node_labels[i]
+  end
+  local _, predicted_class  = node_ys_t:max(2)
+  local f1_score, precision_train, recall_train = unpack(calc_f1(predicted_class, torch.reshape(node_labels_t, predicted_class:size(1), predicted_class:size(2))))
+  return f1_score, precision_train, recall_train
+  
+end
 
 data_index = 1
 n_data = #trees
@@ -317,6 +329,8 @@ function feval(x_arg)
     
     loss = 0
     loss_counter = 0
+    node_ys = {}
+    node_labels = {}
     local tree = gen_batch()
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
@@ -325,23 +339,28 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-3}
+optim_state = {learningRate = 1e-2}
 
 
 for i = 1, 300000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 100 == 0 then
-    print(string.format( 'loss_train = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration %d ', loss_train[1], grad_params:norm(), params:norm(), i))
+    f1_score_train, precision_train, recall_train = calc_nodes_f1()   
+    print(string.format("train set: loss = %6.8f, f1_score = %6.8f, precision = %6.8f, recall = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss_train[1], f1_score_train, precision_train, recall_train, grad_params:norm(), params:norm()))
+
   end
   
   if i % 500 == 0 then
     loss = 0
     loss_counter = 0
+    node_ys = {}
+    node_labels = {}
     tree = trees_dev[1]
     forwardProp(tree['root'])
     loss = (loss / loss_counter)
-    print(string.format( 'loss_dev = %6.8f', loss))
+    f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()  
+    print(string.format("dev set: loss = %6.8f, f1_score = %6.8f, precision = %6.8f, recall = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss, f1_score_dev , precision_dev, recall_dev, grad_params:norm(), params:norm()))
     --torch.save('model.t7', m)
   end
   
