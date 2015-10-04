@@ -348,12 +348,15 @@ for i = 1, 4000 do
   end
   
   if i % 50 == 0 then
+    local dev_size = basic_batch_size
     loss = 0
     loss_counter = 0
-    for _, tree in pairs(trees_dev) do 
-      forwardProp(tree['root'])
+    for k, tree in pairs(trees_dev) do 
+      if k <= dev_size then
+        forwardProp(tree['root'])
+      end
     end
-    loss = (loss / loss_counter) / #trees_dev
+    loss = (loss / loss_counter) / dev_size
     print(string.format( 'loss_dev = %6.8f', loss))
     --torch.save('model.t7', m)
   end
