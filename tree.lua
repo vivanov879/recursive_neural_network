@@ -331,7 +331,7 @@ function feval(x_arg)
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
     end
-    loss = (loss / loss_counter) / basic_batch_size
+    loss = (loss / loss_counter) / #batch
     
     return loss, grad_params
 end
@@ -340,7 +340,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 4000 do
+for i = 1, 8500 * 50 / 30 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 10 == 0 then
