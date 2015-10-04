@@ -325,10 +325,10 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-2}
+optim_state = {learningRate = 1e-3}
 
 
-for i = 1, 10000 do
+for i = 1, 300000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 100 == 0 then
@@ -336,7 +336,6 @@ for i = 1, 10000 do
   end
   
   if i % 500 == 0 then
-    local dev_size = basic_batch_size
     loss = 0
     loss_counter = 0
     tree = trees_dev[1]
