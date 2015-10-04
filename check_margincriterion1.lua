@@ -4,8 +4,8 @@ require 'nn'
 
 function gradUpdate(mlp, x, y, criterion, learningRate)
   mlp:zeroGradParameters()
-   
-  for i = 1, 1000 do 
+  n = 100
+  for i = 1, n do 
    local pred = mlp:forward(x)
    local err = criterion:forward(pred, y)
    local gradCriterion = criterion:backward(pred, y)
@@ -21,8 +21,10 @@ x1 = torch.rand(5)
 x2 = torch.rand(5)
 criterion=nn.MarginCriterion(1)
 
- gradUpdate(mlp, x1, torch.Tensor(1):fill(1), criterion, 0.01)
- gradUpdate(mlp, x2, torch.Tensor(1):fill(-1), criterion, 0.01)
+for i = 1, 100 do 
+ gradUpdate(mlp, x1, torch.Tensor(1):fill(1), criterion, 0.001)
+ gradUpdate(mlp, x2, torch.Tensor(1):fill(-1), criterion, 0.001)
+end
 
 print(mlp:forward(x1))
 print(mlp:forward(x2))

@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train.txt')
+treeStrings = read_words('train1.txt')
 
 
 openChar = '('
@@ -177,10 +177,10 @@ function gen_trees(fn)
   return trees
 end
 
-trees_dev = gen_trees('dev.txt')
+trees_dev = gen_trees('dev1.txt')
 
 
-h_dim = 100
+h_dim = 30
 output_dim = 5
 
 
@@ -192,9 +192,7 @@ h = nn.ReLU()(h)
 m = nn.gModule({h_left, h_right}, {h})
 
 h_raw = nn.Identity()()
-h = nn.Linear(h_dim, h_dim/2)(h_raw)
-h = nn.Tanh()(h)
-y = nn.Linear(h_dim/2, output_dim)(h)
+y = nn.Linear(h_dim, output_dim)(h_raw)
 y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
@@ -312,15 +310,24 @@ function calc_nodes_f1()
   
 end
 
+batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
-  local tree = trees[data_index]
-  data_index = data_index + 1
-  if data_index > n_data then
+  start_index = data_index
+  end_index = math.min(n_data, start_index + batch_size - 1)
+  if end_index == n_data then
     data_index = 1
+  else
+    data_index = data_index + batch_size
   end
-  return tree
+  basic_batch_size = end_index - start_index + 1
+  batch = {}
+  for i = 1, basic_batch_size do 
+    batch[#batch + 1] = trees[start_index + i - 1]
+  end
+  
+  return batch
 end
 
 function feval(x_arg)
@@ -333,10 +340,12 @@ function feval(x_arg)
     loss_counter = 0
     node_ys = {}
     node_labels = {}
-    local tree = gen_batch()
+    local batch = gen_batch()
+    for _, tree in pairs(batch) do 
       forwardProp(tree['root'])
       backProp(tree['root'], torch.zeros(1, h_dim))
-    loss = (loss / loss_counter)
+    end
+    loss = loss / loss_counter
     
     grad_params:clamp(-5, 5)
 
@@ -349,7 +358,7 @@ optim_state = {learningRate = 1e-2}
 
 for i = 1, 300000 do
 
-  local _, loss_train = optim.adagrad(feval, params, optim_state)
+  local _, loss_train = optim.adam(feval, params, optim_state)
   if i % 100 == 0 then
     f1_score_train, precision_train, recall_train = calc_nodes_f1()   
     print('train f1_score:', f1_score_train)
@@ -359,14 +368,17 @@ for i = 1, 300000 do
 
   end
   
-  if i % 500 == 0 then
+  if i % 1000 == 0 then
     loss = 0
     loss_counter = 0
     node_ys = {}
     node_labels = {}
-    tree = trees_dev[1]
-    forwardProp(tree['root'])
-    loss = (loss / loss_counter)
+    local batch = gen_batch()
+    for _, tree in pairs(trees_dev) do 
+      forwardProp(tree['root'])
+      backProp(tree['root'], torch.zeros(1, h_dim))
+    end
+    loss = loss / loss_counter
     f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()  
     print('dev f1_score:', f1_score_dev)
     print('dev precesion:', precision_dev)
