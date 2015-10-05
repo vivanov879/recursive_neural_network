@@ -203,8 +203,8 @@ criterion = nn.ClassNLLCriterion()
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 100)
-embed_clones = model_utils.clone_many_times(embed, 100)
+m_clones = model_utils.clone_many_times(m, 150)
+embed_clones = model_utils.clone_many_times(embed, 150)
 criterion_clones = model_utils.clone_many_times(criterion, 150)
 lsf_clones= model_utils.clone_many_times(lsf, 150)
 
@@ -243,21 +243,21 @@ node_labels = {}
 loss = 0 --used for forwardProp
 loss_counter = 0
 function forwardProp(node)
-  local x, h, h_left, h_right, y
+  local h
   if node['isLeaf'] then 
-    x = torch.Tensor(1):fill(node['word'])
+    local x = torch.Tensor(1):fill(node['word'])
     h = node['embed']:forward(x)
     node['x'] = x
     
   else
-    h_left = forwardProp(node['left'])
-    h_right = forwardProp(node['right'])
+    local h_left = forwardProp(node['left'])
+    local h_right = forwardProp(node['right'])
     h = node['m']:forward({h_left, h_right})
     node['h_left'] = h_left
     node['h_right'] = h_right
     
   end
-  y = node['lsf']:forward(h)
+  local y = node['lsf']:forward(h)
   node['loss'] = node['criterion']:forward(y, torch.Tensor(1):fill(node['label']))
   loss = loss + node['loss']
   loss_counter = loss_counter + 1
@@ -269,24 +269,23 @@ function forwardProp(node)
 end
 
 function backProp(node, dh1)
-  local y, h, dy, dh, hd2, h_left, h_right, dx, x
-  y = node['y']
-  h = node['h']
+  local y = node['y']
+  local h = node['h']
     
-  dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
-  dh2 = node['lsf']:backward(h, dy)
-  dh = dh1 + dh2
+  local dy = node['criterion']:backward(y, torch.Tensor(1):fill(node['label']))
+  local dh2 = node['lsf']:backward(h, dy)
+  local dh = dh1 + dh2
   
   if not node['isLeaf'] then
-    h_left = node['h_left']
-    h_right= node['h_right']
-    dh_left, dh_right = unpack(node['m']:backward({h_left, h_right}, dh))
+    local h_left = node['h_left']
+    local h_right= node['h_right']
+    local dh_left, dh_right = unpack(node['m']:backward({h_left, h_right}, dh))
     backProp(node['left'], dh_left)
     backProp(node['right'], dh_right)
     
   else
-    x = node['x']
-    dx = node['embed']:backward(x, dh)
+    local x = node['x']
+    local dx = node['embed']:backward(x, dh)
   end
 end
 
@@ -311,7 +310,7 @@ function calc_nodes_f1()
   
 end
 
-batch_size = 2
+batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -354,12 +353,12 @@ function feval(x_arg)
 end
         
     
-optim_state = {learningRate = 1e-1}
+optim_state = {learningRate = 1e-2}
 
 
 for i = 1, 1000 do
 
-  local _, loss_train = optim.adam(feval, params, optim_state)
+  local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 10 == 0 then
     f1_score_train, precision_train, recall_train = calc_nodes_f1()   
     print('train f1_score:', f1_score_train)
