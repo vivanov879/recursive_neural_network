@@ -1,5 +1,6 @@
 require 'mobdebug'.start()
 require 'nn'
+model_utils = require 'model_utils'
 
 
 function gradUpdate(mlp, x, y, criterion, learningRate)
@@ -16,6 +17,8 @@ end
 
 mlp = nn.Sequential()
 mlp:add(nn.Linear(5, 1))
+
+params, grad_params = model_utils.combine_all_parameters(mlp)
 
 x1 = torch.rand(5)
 x2 = torch.rand(5)
