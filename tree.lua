@@ -203,10 +203,10 @@ criterion = nn.ClassNLLCriterion()
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 150)
-embed_clones = model_utils.clone_many_times(embed, 150)
-criterion_clones = model_utils.clone_many_times(criterion, 150)
-lsf_clones= model_utils.clone_many_times(lsf, 150)
+m_clones = model_utils.clone_many_times(m, 250)
+embed_clones = model_utils.clone_many_times(embed, 250)
+criterion_clones = model_utils.clone_many_times(criterion, 250)
+lsf_clones= model_utils.clone_many_times(lsf, 250)
 
 m_counter = 1
 embed_counter = 1
@@ -228,10 +228,7 @@ end
 
 function fill(trees)
   for _, tree in pairs(trees) do 
-    m_counter = 1
-    embed_counter = 1
-    criterion_counter = 1
-    lsf_counter = 1
+
     leftTraverse(tree['root'], fill_clones, nil)
   end
 end
