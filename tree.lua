@@ -203,16 +203,17 @@ criterion = nn.ClassNLLCriterion()
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 250)
-embed_clones = model_utils.clone_many_times(embed, 250)
-criterion_clones = model_utils.clone_many_times(criterion, 250)
-lsf_clones= model_utils.clone_many_times(lsf, 250)
+m_clones = model_utils.clone_many_times(m, 2501)
+embed_clones = model_utils.clone_many_times(embed, 2502)
+criterion_clones = model_utils.clone_many_times(criterion, 4303)
+lsf_clones= model_utils.clone_many_times(lsf, 4304)
 
 m_counter = 1
 embed_counter = 1
 criterion_counter = 1
 lsf_counter = 1
 function fill_clones(node, args)
+  
   node['criterion'] = criterion_clones[criterion_counter]
   criterion_counter = criterion_counter + 1
   node['lsf'] = lsf_clones[lsf_counter]
@@ -226,6 +227,7 @@ function fill_clones(node, args)
   end
 end
 
+
 function fill(trees)
   for _, tree in pairs(trees) do 
 
@@ -234,6 +236,9 @@ function fill(trees)
 end
 fill(trees)
 fill(trees_dev)
+
+print(m_counter, embed_counter, criterion_counter, lsf_counter)
+
 
 node_ys = {}
 node_labels = {}
@@ -307,7 +312,7 @@ function calc_nodes_f1()
   
 end
 
-batch_size = 1
+batch_size = 2
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -343,7 +348,7 @@ function feval(x_arg)
       backProp(tree['root'], torch.zeros(1, h_dim))
     end
     loss = loss / loss_counter
-    
+ 
     grad_params:clamp(-5, 5)
 
     return loss, grad_params

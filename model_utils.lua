@@ -126,6 +126,7 @@ function model_utils.clone_many_times(net, T)
     mem:writeObject(net)
 
     for t = 1, T do
+      print(string.format('creating clone %d out of %d', t, T))
         -- We need to use a new reader for each clone.
         -- We don't want to use the pointers to already read objects.
         local reader = torch.MemoryFile(mem:storage(), "r"):binary()
