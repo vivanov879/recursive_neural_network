@@ -155,12 +155,12 @@ function count_nodes(node, args)
   num_nodes = num_nodes + 1
 end
 
-max_num_nodes = 0
-for _, tree in pairs(trees) do 
-  local num_nodes = 0
-  leftTraverse(tree['root'], count_nodes, nil)
-  max_num_nodes = math.max(max_num_nodes, num_nodes)
-end
+--max_num_nodes = 0
+--for _, tree in pairs(trees) do 
+--  local num_nodes = 0
+--  leftTraverse(tree['root'], count_nodes, nil)
+--  max_num_nodes = math.max(max_num_nodes, num_nodes)
+--end
 
 --now save test, dev, and train trees using wordMap created with train tree
 
