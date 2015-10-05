@@ -310,7 +310,7 @@ function calc_nodes_f1()
   
 end
 
-batch_size = 30
+batch_size = 1
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -356,7 +356,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 1000 do
+for i = 1, 370 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 10 == 0 then
@@ -365,8 +365,8 @@ for i = 1, 1000 do
     print('train precesion:', precision_train)
     print('train recall:', recall_train)
     print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration = %d", loss_train[1], grad_params:norm(), params:norm(), i))
-
   end
+
   
   if i % 200 == 0 then
     loss = 0
