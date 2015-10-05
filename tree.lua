@@ -188,7 +188,7 @@ h_left = nn.Identity()()
 h_right = nn.Identity()()
 h = nn.JoinTable(2)({h_left, h_right})
 h = nn.Linear(2 * h_dim, h_dim)(h)
-h = nn.Tanh()(h)
+h = nn.ReLU()(h)
 m = nn.gModule({h_left, h_right}, {h})
 
 h_raw = nn.Identity()()
