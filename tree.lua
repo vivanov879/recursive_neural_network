@@ -197,23 +197,22 @@ y = nn.LogSoftMax()(y)
 lsf = nn.gModule({h_raw}, {y})
 
 embed = Embedding(#inv_wordMap, h_dim)
-weights = torch.Tensor({1,0.5,0.1,0.5,1})
 criterion = nn.ClassNLLCriterion()
 
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 2501)
-embed_clones = model_utils.clone_many_times(embed, 2502)
-criterion_clones = model_utils.clone_many_times(criterion, 4303)
-lsf_clones= model_utils.clone_many_times(lsf, 4304)
+m_clones = model_utils.clone_many_times(m, 451)
+embed_clones = model_utils.clone_many_times(embed, 452)
+criterion_clones = model_utils.clone_many_times(criterion, 433)
+lsf_clones= model_utils.clone_many_times(lsf, 434)
 
 m_counter = 1
 embed_counter = 1
 criterion_counter = 1
 lsf_counter = 1
 function fill_clones(node, args)
-  
+
   node['criterion'] = criterion_clones[criterion_counter]
   criterion_counter = criterion_counter + 1
   node['lsf'] = lsf_clones[lsf_counter]
@@ -294,7 +293,7 @@ end
 
 function populate_confusion_matrix(node, confusion)
   local _, predicted_class  = node['y']:max(2)
-  confusion[node['label']][predicted_class[1][1]] = confusion[node['label']][predicted_class[1][1]] + 1
+  confusion:add(predicted_class[1][1], node['label'])
 end
 
   
@@ -348,6 +347,7 @@ function feval(x_arg)
       backProp(tree['root'], torch.zeros(1, h_dim))
     end
     loss = loss / loss_counter
+    grad_params:div(loss_counter)
  
     grad_params:clamp(-5, 5)
 
@@ -396,12 +396,12 @@ for _, tree in pairs(trees_dev) do
     forwardProp(tree['root'])
 end
 
-confusion_train = torch.zeros(5, 5)
+confusion_train = optim.ConfusionMatrix({1,2,3,4,5})
 for k, tree in pairs(trees) do 
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_train)
 end
 
-confusion_dev = torch.zeros(5, 5)
+confusion_dev = optim.ConfusionMatrix({1,2,3,4,5})
 for _, tree in pairs(trees_dev) do 
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_dev)
 end
