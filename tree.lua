@@ -366,7 +366,6 @@ for i = 1, 1000 do
     print(string.format("dev set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss, grad_params:norm(), params:norm()))
     print(confusion)
   end
-  
 end
 
 
