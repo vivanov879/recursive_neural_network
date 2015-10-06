@@ -202,17 +202,16 @@ criterion = nn.ClassNLLCriterion()
 local params, grad_params = model_utils.combine_all_parameters(m, embed, lsf)
 params:uniform(-0.08, 0.08)
 
-m_clones = model_utils.clone_many_times(m, 451)
-embed_clones = model_utils.clone_many_times(embed, 452)
-criterion_clones = model_utils.clone_many_times(criterion, 433)
-lsf_clones= model_utils.clone_many_times(lsf, 434)
+m_clones = model_utils.clone_many_times(m, 151)
+embed_clones = model_utils.clone_many_times(embed, 152)
+criterion_clones = model_utils.clone_many_times(criterion, 153)
+lsf_clones= model_utils.clone_many_times(lsf, 154)
 
 m_counter = 1
 embed_counter = 1
 criterion_counter = 1
 lsf_counter = 1
 function fill_clones(node, args)
-
   node['criterion'] = criterion_clones[criterion_counter]
   criterion_counter = criterion_counter + 1
   node['lsf'] = lsf_clones[lsf_counter]
@@ -229,7 +228,10 @@ end
 
 function fill(trees)
   for _, tree in pairs(trees) do 
-
+    m_counter = 1
+    embed_counter = 1
+    criterion_counter = 1
+    lsf_counter = 1
     leftTraverse(tree['root'], fill_clones, nil)
   end
 end
@@ -358,7 +360,7 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 370 do
+for i = 1, 1000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 10 == 0 then
@@ -370,7 +372,7 @@ for i = 1, 370 do
   end
 
   
-  if i % 200 == 0 then
+  if false then
     loss = 0
     loss_counter = 0
     node_ys = {}
@@ -391,23 +393,21 @@ for i = 1, 370 do
   
 end
 
-for _, tree in pairs(trees_dev) do 
-    loss = 0
-    forwardProp(tree['root'])
-end
 
 confusion_train = optim.ConfusionMatrix({1,2,3,4,5})
 for k, tree in pairs(trees) do 
+  forwardProp(tree['root'])
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_train)
 end
+print(confusion_train)
 
 confusion_dev = optim.ConfusionMatrix({1,2,3,4,5})
 for _, tree in pairs(trees_dev) do 
+  forwardProp(tree['root'])
   leftTraverse(tree['root'], populate_confusion_matrix, confusion_dev)
 end
 
 
-print(confusion_train)
 print(confusion_dev)
 
 
