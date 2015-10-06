@@ -241,8 +241,6 @@ fill(trees_dev)
 print(m_counter, embed_counter, criterion_counter, lsf_counter)
 
 
-node_ys = {}
-node_labels = {}
 loss = 0 --used for forwardProp
 loss_counter = 0
 function forwardProp(node)
@@ -266,8 +264,6 @@ function forwardProp(node)
   loss_counter = loss_counter + 1
   node['y'] = y
   node['h'] = h
-  node_ys[#node_ys + 1] = node['y']
-  node_labels[#node_labels + 1] = node['label']
   return h
 end
 
@@ -299,20 +295,6 @@ function populate_confusion_matrix(node, confusion)
 end
 
   
-function calc_nodes_f1()
-  assert(#node_ys == #node_labels)
-  node_ys_t = torch.Tensor(#node_ys, 5)
-  node_labels_t = torch.Tensor(#node_labels)
-  for i, _ in pairs(node_ys) do 
-    node_ys_t[{{i}, {}}] = node_ys[i]
-    node_labels_t[i] = node_labels[i]
-  end
-  local _, predicted_class  = node_ys_t:max(2)
-  local f1_score, precision_train, recall_train = unpack(calc_f1(predicted_class, torch.reshape(node_labels_t, predicted_class:size(1), predicted_class:size(2))))
-  return f1_score, precision_train, recall_train
-  
-end
-
 batch_size = 2
 data_index = 1
 n_data = #trees
@@ -341,8 +323,6 @@ function feval(x_arg)
     
     loss = 0
     loss_counter = 0
-    node_ys = {}
-    node_labels = {}
     local batch = gen_batch()
     for _, tree in pairs(batch) do 
       forwardProp(tree['root'])
@@ -364,51 +344,45 @@ for i = 1, 1000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
   if i % 10 == 0 then
-    f1_score_train, precision_train, recall_train = calc_nodes_f1()   
-    print('train f1_score:', f1_score_train)
-    print('train precesion:', precision_train)
-    print('train recall:', recall_train)
     print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration = %d", loss_train[1], grad_params:norm(), params:norm(), i))
+    local confusion = optim.ConfusionMatrix({1,2,3,4,5})
+    local tree = trees[math.random(1, #trees)]
+    forwardProp(tree['root'])
+    leftTraverse(tree['root'], populate_confusion_matrix, confusion)
+    print(confusion)
+    
   end
 
   
-  if false then
+  if i % 20 == 0 then
     loss = 0
     loss_counter = 0
-    node_ys = {}
-    node_labels = {}
-    local batch = gen_batch()
+    local confusion = optim.ConfusionMatrix({1,2,3,4,5})
     for _, tree in pairs(trees_dev) do 
       forwardProp(tree['root'])
-      backProp(tree['root'], torch.zeros(1, h_dim))
+      leftTraverse(tree['root'], populate_confusion_matrix, confusion)
     end
     loss = loss / loss_counter
-    f1_score_dev, precision_dev, recall_dev = calc_nodes_f1()
-    print('dev f1_score:', f1_score_dev)
-    print('dev precesion:', precision_dev)
-    print('dev recall:', recall_dev)
     print(string.format("dev set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e", loss, grad_params:norm(), params:norm()))
-    --torch.save('model.t7', m)
+    print(confusion)
   end
   
 end
 
 
-confusion_train = optim.ConfusionMatrix({1,2,3,4,5})
+confusion = optim.ConfusionMatrix({1,2,3,4,5})
 for k, tree in pairs(trees) do 
   forwardProp(tree['root'])
-  leftTraverse(tree['root'], populate_confusion_matrix, confusion_train)
+  leftTraverse(tree['root'], populate_confusion_matrix, confusion)
 end
-print(confusion_train)
+print(confusion)
 
-confusion_dev = optim.ConfusionMatrix({1,2,3,4,5})
+confusion = optim.ConfusionMatrix({1,2,3,4,5})
 for _, tree in pairs(trees_dev) do 
   forwardProp(tree['root'])
-  leftTraverse(tree['root'], populate_confusion_matrix, confusion_dev)
+  leftTraverse(tree['root'], populate_confusion_matrix, confusion)
 end
-
-
-print(confusion_dev)
+print(confusion)
 
 
 
