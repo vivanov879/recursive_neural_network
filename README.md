@@ -4,13 +4,13 @@ Tree structure assigned to every sentence is assumed given. Every node in a tree
 In Terminal.app run `th tree.lua` to train the model and check perfromance on the dev set. Prints confusion matrix for train and dev sets.
 
 Result I got with 
-`
+```
 h_dim = 30
 batch_size = 30
 number_of_iteration = 10000
-`
+```
 train set:
-``
+```
 ConfusionMatrix:
 [[    1356    4922     340    1360     267]   16.446% 	[class: 1]
  [     219   21002    7292    5494     355]   61.120% 	[class: 2]
@@ -20,10 +20,10 @@ ConfusionMatrix:
  + average row correct: 61.450784802437% 
  + average rowUcol correct (VOC measure): 49.672969281673% 
  + global correct: 84.473071297186%
-``
+```
 
-dev set
-``
+dev set:
+```
 ConfusionMatrix:
 [[     127     574     151     192      26]   11.869% 	[class: 1]
  [      17    2229    1531     765      71]   48.320% 	[class: 2]
