@@ -25,8 +25,8 @@ x2 = torch.rand(5)
 criterion=nn.MarginCriterion(1)
 
 for i = 1, 100 do 
- gradUpdate(mlp, x1, torch.Tensor(1):fill(1), criterion, 0.001)
- gradUpdate(mlp, x2, torch.Tensor(1):fill(-1), criterion, 0.001)
+ gradUpdate(mlp, x1, torch.Tensor(1):fill(1), criterion, 0.01)
+ gradUpdate(mlp, x2, torch.Tensor(1):fill(-1), criterion, 0.01)
 end
 
 print(mlp:forward(x1))
