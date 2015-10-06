@@ -10,7 +10,7 @@ require 'project_utils'
 nngraph.setDebug(true)
 
 
-treeStrings = read_words('train1.txt')
+treeStrings = read_words('train.txt')
 
 
 openChar = '('
@@ -177,7 +177,7 @@ function gen_trees(fn)
   return trees
 end
 
-trees_dev = gen_trees('dev1.txt')
+trees_dev = gen_trees('dev.txt')
 
 
 h_dim = 30
@@ -206,6 +206,7 @@ m_clones = model_utils.clone_many_times(m, 151)
 embed_clones = model_utils.clone_many_times(embed, 152)
 criterion_clones = model_utils.clone_many_times(criterion, 153)
 lsf_clones= model_utils.clone_many_times(lsf, 154)
+print('clones created')
 
 m_counter = 1
 embed_counter = 1
@@ -295,7 +296,7 @@ function populate_confusion_matrix(node, confusion)
 end
 
   
-batch_size = 2
+batch_size = 30
 data_index = 1
 n_data = #trees
 function gen_batch()
@@ -340,10 +341,10 @@ end
 optim_state = {learningRate = 1e-2}
 
 
-for i = 1, 1000 do
+for i = 1, 10000 do
 
   local _, loss_train = optim.adagrad(feval, params, optim_state)
-  if i % 10 == 0 then
+  if i % 100 == 0 then
     print(string.format("train set: loss = %6.8f, grad_params:norm() = %6.4e, params:norm() = %6.4e, iteration = %d", loss_train[1], grad_params:norm(), params:norm(), i))
     local confusion = optim.ConfusionMatrix({1,2,3,4,5})
     local tree = trees[math.random(1, #trees)]
@@ -354,7 +355,7 @@ for i = 1, 1000 do
   end
 
   
-  if i % 20 == 0 then
+  if i % 500 == 0 then
     loss = 0
     loss_counter = 0
     local confusion = optim.ConfusionMatrix({1,2,3,4,5})
