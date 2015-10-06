@@ -10,7 +10,7 @@ batch_size = 30
 number_of_iteration = 10000
 `
 train set:
-`
+``
 ConfusionMatrix:
 [[    1356    4922     340    1360     267]   16.446% 	[class: 1]
  [     219   21002    7292    5494     355]   61.120% 	[class: 2]
@@ -20,10 +20,10 @@ ConfusionMatrix:
  + average row correct: 61.450784802437% 
  + average rowUcol correct (VOC measure): 49.672969281673% 
  + global correct: 84.473071297186%
-`
+``
 
 dev set
-`
+``
 ConfusionMatrix:
 [[     127     574     151     192      26]   11.869% 	[class: 1]
  [      17    2229    1531     765      71]   48.320% 	[class: 2]
@@ -33,4 +33,4 @@ ConfusionMatrix:
  + average row correct: 53.270339220762% 
  + average rowUcol correct (VOC measure): 41.442299634218% 
  + global correct: 79.132385938669%
-`
+``
